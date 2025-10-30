@@ -1,0 +1,134 @@
+erdiagram Nandini_Agarwalerd
+notation=crowsfoot
+
+// RC_Models ERD (focused additions: ShipmentLine, Payment)
+
+entity Customer {
+    customer_id: INTEGER key
+    name: VARCHAR(200)
+    email: VARCHAR(200)
+    status: VARCHAR(20)
+    created_date: DATE
+}
+
+entity Invoice {
+    invoice_id: INTEGER key
+    invoice_date: DATE
+    total_amount: DECIMAL(10,2)
+    shipping_charge: DECIMAL(10,2)
+    customer_id: INTEGER
+    status: VARCHAR(20)
+}
+
+entity InvoiceLine {
+    invoice_id: INTEGER key
+    line_no: INTEGER key
+    product_id: INTEGER
+    quantity: INTEGER
+    unit_price: DECIMAL(10,2)
+    line_total: DECIMAL(10,2)
+}
+
+entity Product {
+    product_id: INTEGER key
+    name: VARCHAR(200)
+    category: VARCHAR(100)
+    scale: VARCHAR(20)
+    price: DECIMAL(10,2)
+    min_order_qty: INTEGER
+    qty_on_hand: INTEGER
+}
+
+entity Manufacturer {
+    manufacturer_id: INTEGER key
+    name: VARCHAR(200)
+    website: VARCHAR(200)
+    phone: VARCHAR(50)
+}
+
+entity PurchaseOrder {
+    po_id: INTEGER key
+    order_date: DATE
+    status: VARCHAR(20)
+    manufacturer_id: INTEGER
+}
+
+entity PurchaseOrderLine {
+    po_id: INTEGER key
+    line_no: INTEGER key
+    product_id: INTEGER
+    qty_ordered: INTEGER
+    qty_received: INTEGER
+    unit_cost: DECIMAL(10,2)
+}
+
+entity Shipment {
+    shipment_id: INTEGER key
+    ship_date: DATE
+    status: VARCHAR(20)
+    shipment_type: VARCHAR(10) // inbound|outbound
+    carrier: VARCHAR(100)
+    tracking_number: VARCHAR(100)
+}
+
+entity ShipmentLine {
+    shipment_id: INTEGER key
+    line_no: INTEGER key
+    ref_type: VARCHAR(10) // invoice|po
+    ref_id: INTEGER
+    ref_line_no: INTEGER
+    product_id: INTEGER
+    qty_shipped: INTEGER
+}
+
+entity Payment {
+    payment_id: INTEGER key
+    invoice_id: INTEGER
+    payment_date: DATE
+    amount: DECIMAL(10,2)
+    payment_method: VARCHAR(50)
+    status: VARCHAR(20) // authorized|captured|refunded|failed
+    auth_code: VARCHAR(100)
+    last4: VARCHAR(4)
+}
+
+// Relationships
+relationship CustomerInvoice {
+    Customer[1 | "customer"] -> Invoice[0..N | "invoice"]
+}
+
+relationship InvoiceInvoiceLine {
+    Invoice[1 | "invoice"] -> InvoiceLine[0..N | "line"]
+}
+
+relationship ProductInvoiceLine {
+    Product[1 | "product"] -> InvoiceLine[0..N | "invoice_line"]
+}
+
+relationship ManufacturerProduct {
+    Manufacturer[1 | "manufacturer"] -> Product[0..N | "product"]
+}
+
+relationship ManufacturerPurchaseOrder {
+    Manufacturer[1 | "manufacturer"] -> PurchaseOrder[0..N | "purchase_order"]
+}
+
+relationship PurchaseOrderPOLine {
+    PurchaseOrder[1 | "po"] -> PurchaseOrderLine[0..N | "po_line"]
+}
+
+relationship ProductPOLine {
+    Product[1 | "product"] -> PurchaseOrderLine[0..N | "po_line"]
+}
+
+relationship InvoiceShipment {
+    Invoice[1 | "invoice"] -> Shipment[0..N | "shipment"]
+}
+
+relationship ShipmentShipmentLine {
+    Shipment[1 | "shipment"] -> ShipmentLine[0..N | "shipment_line"]
+}
+
+relationship InvoicePayment {
+    Invoice[1 | "invoice"] -> Payment[0..N | "payment"]
+}
